@@ -39,7 +39,7 @@ int main(void) {
   char recvbuff[RECVSIZE] = {0};
   int bytes = 0;
   char *body = NULL;
-  long int bodylen = 0;
+  size_t bodylen = 0;
   char *http = "HTTP/1.1 200 OK\r\nContent-length: ";
   long int httplen = 0, numlen = 0;
   char num[20];
@@ -54,14 +54,13 @@ int main(void) {
     if ((bytes = recv(thierfd, recvbuff, RECVSIZE, 0)) < 0) {
       errorhandle(bytes);
     }
-    printf("%s", recvbuff);
+    printf("%s\n", recvbuff);
     if (strncmp(recvbuff, "GET", 3) != 0) {
       printf("this is not a get request!\n");
       return 1;
     }
     keepalive = true;
-    body = httphandler(recvbuff, strlen(recvbuff));
-    bodylen = strlen(body);
+    body = httphandler(recvbuff, strlen(recvbuff), &bodylen);
     snprintf(num, 20, "%li", bodylen + 1);
     numlen = strlen(num);
     httplen = strlen(http);
@@ -69,17 +68,15 @@ int main(void) {
     strcpy(sendbuff, http);
     strcpy(sendbuff + httplen, num);
     strcpy(sendbuff + httplen + numlen, "\r\n\r\n");
-    strcpy(sendbuff + httplen + numlen + 4, body);
+    memcpy(sendbuff + httplen + numlen + 4, body, bodylen);
     if ((bytes = send(thierfd, sendbuff, httplen + bodylen + numlen + 5, 0)) <=
         0) {
       errorhandle(bytes);
     }
-    printf(" %s\n %i, %lu\n", sendbuff, bytes, strlen(sendbuff));
-    if (!keep_alive(recvbuff, strlen(recvbuff))) {
-      memset(recvbuff, 0, RECVSIZE);
-      close(thierfd);
-      keepalive = false;
-    }
+    printf(" %i, %s\n", bytes, sendbuff);
+    memset(recvbuff, 0, RECVSIZE);
+    close(thierfd);
+    keepalive = false;
     free(sendbuff);
     free(body);
     body = NULL;

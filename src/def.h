@@ -8,7 +8,7 @@
 void errorhandle(int errcode);
 bool keep_alive(char *http, size_t size);
 char *filepath(char *http, size_t size);
-char *httphandler(char *http, size_t size);
+char *httphandler(char *http, size_t size, size_t *retsize);
 
 enum request { GET, POST, PUT, HEAD, DELETE, PATCH, OPTIONS, CONNECT, TRACE };
 

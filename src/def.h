@@ -6,7 +6,7 @@
 #define RECVSIZE 5000
 
 void errorhandle(int errcode);
-bool keep_alive(char *http, size_t size);
+bool keep_alive(char *http);
 char *filepath(char *http, size_t size);
 char *httphandler(char *http, size_t size, size_t *retsize);
 

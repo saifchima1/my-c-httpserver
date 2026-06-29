@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool keep_alive(char *http, size_t size) {
+bool keep_alive(char *http) {
   if (strstr(http, "Connection: keep-alive") != NULL ||
       (strstr(http, "HTTP/1.1") != NULL &&
        strstr(http, "Connection: closed") == NULL)) {
@@ -32,7 +32,7 @@ char *filepath(char *http, size_t size) {
     printf("couldn't find the end of the path ");
     errorhandle(1);
   }
-  char *result = malloc(i);
+  char *result = malloc(i + 1);
   strncpy(result, buffer, i);
   result[i] = '\0';
 
@@ -89,7 +89,7 @@ char *httphandler(char *http, size_t size, size_t *retsize) {
       printf("faild to allocate storage for the string ");
       errorhandle(1);
     }
-    long int bytes = fread(result, 1, fsize, pfile);
+    size_t bytes = fread(result, 1, fsize, pfile);
     if (bytes != fsize) {
       printf("failed reading the file");
       errorhandle(1);

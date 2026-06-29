@@ -35,7 +35,6 @@ int main(void) {
     errorhandle(status);
   }
   // end of initialisation:
-  bool keepalive = false;
   char recvbuff[RECVSIZE] = {0};
   int bytes = 0;
   char *body = NULL;
@@ -45,11 +44,9 @@ int main(void) {
   char num[20];
   char *sendbuff;
   while (1) {
-    if (!keepalive) {
-      if ((thierfd = accept(sockfd, (struct sockaddr *)&thieraddr,
-                            &thieraddrlen)) < 0) {
-        errorhandle(thierfd);
-      }
+    if ((thierfd = accept(sockfd, (struct sockaddr *)&thieraddr,
+                          &thieraddrlen)) < 0) {
+      errorhandle(thierfd);
     }
     if ((bytes = recv(thierfd, recvbuff, RECVSIZE, 0)) < 0) {
       errorhandle(bytes);
@@ -59,7 +56,6 @@ int main(void) {
       printf("this is not a get request!\n");
       return 1;
     }
-    keepalive = true;
     body = httphandler(recvbuff, strlen(recvbuff), &bodylen);
     snprintf(num, 20, "%li", bodylen + 1);
     numlen = strlen(num);
@@ -76,7 +72,6 @@ int main(void) {
     printf(" %i, %s\n", bytes, sendbuff);
     memset(recvbuff, 0, RECVSIZE);
     close(thierfd);
-    keepalive = false;
     free(sendbuff);
     free(body);
     body = NULL;

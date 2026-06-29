@@ -54,6 +54,7 @@ int main(void) {
     if ((bytes = recv(thierfd, recvbuff, RECVSIZE, 0)) < 0) {
       errorhandle(bytes);
     }
+    printf("%s", recvbuff);
     if (strncmp(recvbuff, "GET", 3) != 0) {
       printf("this is not a get request!\n");
       return 1;
@@ -73,7 +74,7 @@ int main(void) {
         0) {
       errorhandle(bytes);
     }
-    printf("%s\n%i\n", sendbuff, bytes);
+    printf(" %s\n %i, %lu\n", sendbuff, bytes, strlen(sendbuff));
     if (!keep_alive(recvbuff, strlen(recvbuff))) {
       memset(recvbuff, 0, RECVSIZE);
       close(thierfd);

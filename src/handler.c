@@ -34,6 +34,7 @@ char *filepath(char *http, size_t size) {
   }
   char *result = malloc(i);
   strncpy(result, buffer, i);
+  result[i] = '\0';
 
   return result;
 }
@@ -42,8 +43,15 @@ char *httphandler(char *http, size_t size) {
   char *path = filepath(http, size);
   if (strcmp(path, "/") != 0) {
     char *result = NULL;
-
-    FILE *pfile = fopen(path, "r");
+    char relative_path[strlen(path) + 2];
+    strcpy(relative_path, ".");
+    strcpy(relative_path + 1, path);
+    free(path);
+    printf("%s\n", relative_path);
+    FILE *pfile = fopen(relative_path, "r");
+    if (!pfile) {
+      errorhandle(1);
+    }
     fseek(pfile, 0, SEEK_END);
     size_t fsize = ftell(pfile);
     fseek(pfile, 0, SEEK_SET);
@@ -52,7 +60,8 @@ char *httphandler(char *http, size_t size) {
       printf("faild to allocate storage for the string ");
       errorhandle(1);
     }
-    long int bytes = fread(result, fsize, 1, pfile);
+    size_t bytes = fread(result, 1, fsize, pfile);
+    printf(" %zu, %zu", fsize, bytes);
     if (bytes != fsize) {
       printf("failed reading the file");
       errorhandle(1);
@@ -60,11 +69,10 @@ char *httphandler(char *http, size_t size) {
     result[bytes] = '\0';
 
     fclose(pfile);
-    free(path);
     return result;
   } else {
     free(path);
-    char *indexpath = "html/index.html";
+    char *indexpath = "./html/index.html";
     char *result = NULL;
 
     FILE *pfile = fopen(indexpath, "r");

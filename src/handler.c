@@ -39,17 +39,22 @@ char *filepath(char *http, size_t size) {
   return result;
 }
 
-char *httphandler(char *http, size_t size, size_t *retsize) {
+char *httphandler(char *http, size_t size, size_t *retsize, char *ext) {
   char *path = filepath(http, size);
   if (strcmp(path, "/") != 0) {
     char *result = NULL;
     char relative_path[strlen(path) + 2];
     strcpy(relative_path, ".");
     strcpy(relative_path + 1, path);
+    char *temp = strstr(path, ".");
+    if (temp) {
+      strncpy(ext, temp, 25);
+    }
     free(path);
     FILE *pfile = fopen(relative_path, "rb");
     if (!pfile) {
-      errorhandle(1);
+      perror("failed to find the file: \n");
+      return NULL;
     }
     fseek(pfile, 0, SEEK_END);
     size_t fsize = ftell(pfile);
@@ -64,11 +69,10 @@ char *httphandler(char *http, size_t size, size_t *retsize) {
       printf("failed reading the file");
       errorhandle(1);
     }
+    printf("the file has:\n");
     fwrite(result, 1, bytes, stdout);
     result[bytes] = '\0';
     *retsize = bytes;
-    printf("the file has: %s\n", result);
-
     fclose(pfile);
     return result;
   } else {

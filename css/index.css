@@ -1,6 +1,37 @@
-#title{
-  color: red;
+body {
+  background-color: #14152a;
 }
-#button{
+
+#title {
+  color: red;
+  font-size: 375%;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  text-align: center;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+#intro {
+  display: flex;
+  height: 5%;
+}
+
+#button_div {
+  display: flex;
+  height: 5%;
+}
+
+#button {
+  height: 100%;
+  width: 100%;
+
+}
+
+#label {
   color: blue;
 }

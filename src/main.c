@@ -43,6 +43,10 @@ int main(void) {
   long int httplen = 0, numlen = 0;
   char num[20];
   char *sendbuff;
+  char ext[26] = {0};
+  char *extlist[26] = {".js"};
+  char *extheader[50] = {"\r\nContent-Type: application/javascript"};
+  size_t extlen = 0;
   while (1) {
     if ((thierfd = accept(sockfd, (struct sockaddr *)&thieraddr,
                           &thieraddrlen)) < 0) {
@@ -56,25 +60,50 @@ int main(void) {
       printf("this is not a get request!\n");
       return 1;
     }
-    body = httphandler(recvbuff, strlen(recvbuff), &bodylen);
-    snprintf(num, 20, "%li", bodylen + 1);
+    body = httphandler(recvbuff, strlen(recvbuff), &bodylen, ext);
+    if (!body) {
+      continue;
+    }
+    printf("\n");
+    snprintf(num, 20, "%li", bodylen);
     numlen = strlen(num);
+    extlen = strlen(extheader[js]);
     httplen = strlen(http);
-    sendbuff = calloc(httplen + bodylen + numlen + 5, 1);
+    if (strcmp(extlist[js], ext) == 0) {
+      sendbuff = calloc(httplen + extlen + bodylen + numlen + 5, 1);
+
+    } else {
+      sendbuff = calloc(httplen + bodylen + numlen + 5, 1);
+    }
     strcpy(sendbuff, http);
     strcpy(sendbuff + httplen, num);
-    strcpy(sendbuff + httplen + numlen, "\r\n\r\n");
-    memcpy(sendbuff + httplen + numlen + 4, body, bodylen);
-    if ((bytes = send(thierfd, sendbuff, httplen + bodylen + numlen + 5, 0)) <=
-        0) {
-      errorhandle(bytes);
+    if (strcmp(extlist[js], ext) == 0) {
+      strcpy(sendbuff + httplen + numlen, extheader[js]);
+      strcpy(sendbuff + httplen + numlen + extlen, "\r\n\r\n");
+      memcpy(sendbuff + httplen + numlen + extlen + 4, body, bodylen);
+      if ((bytes = send(thierfd, sendbuff,
+                        httplen + extlen + bodylen + numlen + 5, 0)) <= 0) {
+        errorhandle(bytes);
+      }
+      printf("buffer size: %zu\n", httplen + extlen + bodylen + numlen + 5);
+
+    } else {
+      strcpy(sendbuff + httplen + numlen, "\r\n\r\n");
+      memcpy(sendbuff + httplen + numlen + 4, body, bodylen);
+      if ((bytes = send(thierfd, sendbuff, httplen + bodylen + numlen + 5,
+                        0)) <= 0) {
+        errorhandle(bytes);
+      }
+      printf("buffer size: %zu\n", httplen + bodylen + numlen + 5);
     }
-    printf(" %i, %s\n", bytes, sendbuff);
+    printf("bytes sent: %i\n", bytes);
+    printf(" %s\n ext: %s\n", sendbuff, ext);
     memset(recvbuff, 0, RECVSIZE);
     close(thierfd);
     free(sendbuff);
     free(body);
     body = NULL;
+    memset(ext, 0, 26);
   }
 
   freeaddrinfo(servaddr);

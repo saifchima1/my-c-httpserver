@@ -1,5 +1,4 @@
 #include "def.h"
-#include <bits/sockaddr_storage.h>
 #include <netdb.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -9,7 +8,31 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-int main(void) {
+int main(int count, char **argv) {
+  char *index = NULL;
+  char *port = NULL;
+  if (count <= 1){
+    index = "index.html";
+    port = "8080";
+  }else if(count == 2)
+  {
+    index = argv[1];
+    port = "8080";
+  }else if(count == 3){
+    if (strcmp(argv[1],"-i") == 0 ||strcmp(argv[1],"--index") == 0){
+      index = argv[1];
+      port = "8080";
+    } else if(strcmp(argv[1],"-p") == 0 ||strcmp(argv[1],"--port") == 0){
+      index = "index.html";
+      port = argv[2];
+    } else{
+      index = argv[1];
+      port = argv[2];
+    }
+  }else{
+    printf("this program is ccurrently very primitave it's only \"./server [index] [port]\" nothing else\n");
+    return 1;
+  }
   struct addrinfo *servaddr, hint;
   int sockfd, thierfd;
   thierfd = -67;
@@ -20,7 +43,7 @@ int main(void) {
   hint.ai_family = AF_INET;
   hint.ai_socktype = SOCK_STREAM;
   hint.ai_flags = AI_PASSIVE;
-  int status = getaddrinfo(NULL, "8080", &hint, &servaddr);
+  int status = getaddrinfo(NULL, port, &hint, &servaddr);
   if (status != 0) {
     errorhandle(status);
   }
@@ -60,7 +83,7 @@ int main(void) {
       printf("this is not a get request!\n");
       return 1;
     }
-    body = httphandler(recvbuff, strlen(recvbuff), &bodylen, ext);
+    body = httphandler(recvbuff, strlen(recvbuff), index, &bodylen, ext);
     if (!body) {
       continue;
     }

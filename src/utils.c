@@ -1,7 +1,9 @@
-#include "def.h"
-#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
+
+#include "def.h"
 
 void errorhandle(int errcode) {
   fprintf(stderr, "error code:\n");

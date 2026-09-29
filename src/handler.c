@@ -39,7 +39,7 @@ char *filepath(char *http, size_t size) {
   return result;
 }
 
-char *httphandler(char *http, size_t size, size_t *retsize, char *ext) {
+char *httphandler(char *http, size_t size,char *index, size_t *retsize, char *ext) {
   char *path = filepath(http, size);
   if (strcmp(path, "/") != 0) {
     char *result = NULL;
@@ -77,7 +77,7 @@ char *httphandler(char *http, size_t size, size_t *retsize, char *ext) {
     return result;
   } else {
     free(path);
-    char *indexpath = "./html/index.html";
+    char *indexpath = index;
     char *result = NULL;
 
     FILE *pfile = fopen(indexpath, "r");

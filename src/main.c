@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "def.h"
 #include <netdb.h>
 #include <stdbool.h>
@@ -7,31 +8,53 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <getopt.h>
+
+enum options{
+  i,
+  p
+};
 
 int main(int count, char **argv) {
-  char *index = NULL;
-  char *port = NULL;
+  char *index = "index.html";
+  char *port = "8080";
+  static struct option options[] = {
+    {"index",required_argument,0,'i'},
+    {"port",required_argument,0,'p'}
+  };
   if (count <= 1){
     index = "index.html";
-    port = "8080";
   }else if(count == 2)
   {
     index = argv[1];
-    port = "8080";
   }else if(count == 3){
     if (strcmp(argv[1],"-i") == 0 ||strcmp(argv[1],"--index") == 0){
       index = argv[1];
-      port = "8080";
     } else if(strcmp(argv[1],"-p") == 0 ||strcmp(argv[1],"--port") == 0){
-      index = "index.html";
       port = argv[2];
     } else{
       index = argv[1];
       port = argv[2];
     }
   }else{
-    printf("this program is ccurrently very primitave it's only \"./server [index] [port]\" nothing else\n");
-    return 1;
+    bool worsecase = true;
+    int opt = 0;
+    while ((opt = getopt_long(count,argv,"i:p:",options,NULL)) != -1){
+      switch (opt){
+        case 'i':
+          worsecase = false;
+          index = optarg;
+          break;
+        case 'p':
+          worsecase = false;
+          port = optarg;
+          break;
+      }
+    }
+    if (worsecase){
+      printf("this program is ccurrently very primitave it's only \"./server [index] [port]\" nothing else\n");
+      return 1;
+    }
   }
   struct addrinfo *servaddr, hint;
   int sockfd, thierfd;
